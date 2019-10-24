@@ -186,8 +186,23 @@ public class QueryLogicTest {
     }
 
     @Test
-    public void testNonNull3() {
+    public void testConditionExpression() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryPredicateExpress express = QueryConditionExpression
+                .of("username", QueryCompare.EQ, "username");
+        query.where(express.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(2, list.size());
+    }
 
+    @Test
+    public void testNonNull3() {
         EntityManager entityManager = session.getEntityManagerFactory()
                 .createEntityManager();
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -210,7 +225,6 @@ public class QueryLogicTest {
     }
 
     public void insertData(int i) {
-
         //打开事务
         Transaction transaction = session.beginTransaction();
         AddressEntity addressEntity = new AddressEntity("address" + i,
