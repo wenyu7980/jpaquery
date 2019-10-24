@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 /**
  * Copyright wenyu
  *
@@ -28,8 +27,9 @@ import java.util.stream.Collectors;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryLogic implements QueryLogicExpress {
+public class QueryLogic implements QueryPredicateExpress {
     protected enum Logic {
+        /** 与 */
         AND() {
             @Override
             public Predicate predicate(final CriteriaBuilder criteriaBuilder,
@@ -37,6 +37,7 @@ public class QueryLogic implements QueryLogicExpress {
                 return criteriaBuilder.and(predicates);
             }
         },
+        /** 或 */
         OR() {
             @Override
             public Predicate predicate(final CriteriaBuilder criteriaBuilder,
@@ -44,6 +45,7 @@ public class QueryLogic implements QueryLogicExpress {
                 return criteriaBuilder.or(predicates);
             }
         },
+        /** 非 */
         NOT() {
             @Override
             public Predicate predicate(final CriteriaBuilder criteriaBuilder,
@@ -53,7 +55,7 @@ public class QueryLogic implements QueryLogicExpress {
         };
 
         /**
-         * predicate
+         * 判定表达式转换为JPA的判定表单式
          * @param criteriaBuilder
          * @param predicates
          * @return
@@ -63,11 +65,11 @@ public class QueryLogic implements QueryLogicExpress {
     }
 
     /** 逻辑符号 */
-    private Logic logic;
+    protected Logic logic;
     /** 逻辑列表 */
-    private List<QueryLogicExpress> expresses = new ArrayList<>();
+    protected List<QueryPredicateExpress> expresses = new ArrayList<>();
 
-    private QueryLogic(Logic logic, QueryLogicExpress... express) {
+    protected QueryLogic(Logic logic, QueryPredicateExpress... express) {
         this.logic = logic;
         this.expresses.addAll(Arrays.asList(express));
     }
@@ -77,7 +79,7 @@ public class QueryLogic implements QueryLogicExpress {
      * @param expresses
      * @return
      */
-    public static QueryLogic and(QueryLogicExpress... expresses) {
+    public static QueryLogic and(QueryPredicateExpress... expresses) {
         return new QueryLogic(Logic.AND, expresses);
     }
 
@@ -86,7 +88,7 @@ public class QueryLogic implements QueryLogicExpress {
      * @param expresses
      * @return
      */
-    public static QueryLogic or(QueryLogicExpress... expresses) {
+    public static QueryLogic or(QueryPredicateExpress... expresses) {
         return new QueryLogic(Logic.OR, expresses);
     }
 
@@ -95,29 +97,23 @@ public class QueryLogic implements QueryLogicExpress {
      * @param express
      * @return
      */
-    public static QueryLogic not(QueryLogicExpress express) {
+    public static QueryLogic not(QueryPredicateExpress express) {
         return new QueryLogic(Logic.NOT, express);
     }
 
     @Override
     public Predicate predicate(final From<?, ?> from,
             final CriteriaBuilder criteriaBuilder) {
-        if (!this.nonNull()) {
-            return criteriaBuilder.isTrue(criteriaBuilder.literal(true));
-        }
-        final List<QueryLogicExpress> expressList = this.expresses.stream()
-                .filter(QueryLogicExpress::nonNull)
-                .collect(Collectors.toList());
-        Predicate[] predicates = new Predicate[expressList.size()];
-        for (int i = 0; i < expressList.size(); i++) {
-            predicates[i] = expressList.get(i).predicate(from, criteriaBuilder);
+        Predicate[] predicates = new Predicate[this.expresses.size()];
+        for (int i = 0; i < expresses.size(); i++) {
+            predicates[i] = expresses.get(i).predicate(from, criteriaBuilder);
         }
         return this.logic.predicate(criteriaBuilder, predicates);
     }
 
     @Override
     public boolean nonNull() {
-        for (QueryLogicExpress express : this.expresses) {
+        for (QueryPredicateExpress express : this.expresses) {
             if (express.nonNull()) {
                 return true;
             }

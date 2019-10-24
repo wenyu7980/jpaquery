@@ -20,16 +20,16 @@ import javax.persistence.criteria.Predicate;
  */
 
 /**
- *
+ * 表连接表达式
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryJoin implements QueryLogicExpress {
+public class QueryJoin implements QueryPredicateExpress {
 
     private String name;
-    private QueryLogicExpress express;
+    private QueryPredicateExpress express;
 
-    private QueryJoin(String name, QueryLogicExpress express) {
+    private QueryJoin(String name, QueryPredicateExpress express) {
         this.name = name;
         this.express = express;
     }
@@ -40,7 +40,7 @@ public class QueryJoin implements QueryLogicExpress {
      * @param express
      * @return
      */
-    public static QueryJoin join(String name, QueryLogicExpress express) {
+    public static QueryJoin join(String name, QueryPredicateExpress express) {
         return new QueryJoin(name, express);
     }
 

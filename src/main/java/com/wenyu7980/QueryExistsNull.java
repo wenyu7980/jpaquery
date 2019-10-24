@@ -22,13 +22,13 @@ import javax.persistence.criteria.*;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryExists implements QueryPredicateExpress {
+public class QueryExistsNull implements QueryPredicateExpress {
     private String name;
     private String subName;
     private QueryPredicateExpress express;
     private Class<?> clazz;
 
-    public QueryExists(String name, String subName, Class<?> clazz,
+    public QueryExistsNull(String name, String subName, Class<?> clazz,
             QueryPredicateExpress express) {
         this.name = name;
         this.subName = subName;
@@ -36,9 +36,9 @@ public class QueryExists implements QueryPredicateExpress {
         this.clazz = clazz;
     }
 
-    public static QueryExists exists(String name, String subName,
+    public static QueryExistsNull exists(String name, String subName,
             Class<?> clazz, QueryPredicateExpress express) {
-        return new QueryExists(name, subName, clazz, express);
+        return new QueryExistsNull(name, subName, clazz, express);
     }
 
     @Override
@@ -48,15 +48,15 @@ public class QueryExists implements QueryPredicateExpress {
         Subquery<?> subquery = criteria.subquery(clazz);
         Root<?> subRoot = subquery.from(clazz);
         subquery.select(subRoot.get(subName));
-        subquery.where(criteriaBuilder
-                .and(express.predicate(subRoot, criteriaBuilder),
-                        criteriaBuilder
-                                .equal(from.get(name), subRoot.get(subName))));
+        if (express.nonNull()) {
+            subquery.where(criteriaBuilder
+                    .and(express.predicate(subRoot, criteriaBuilder),
+                            criteriaBuilder.equal(from.get(name),
+                                    subRoot.get(subName))));
+        } else {
+            subquery.where(criteriaBuilder.and(criteriaBuilder
+                    .equal(from.get(name), subRoot.get(subName))));
+        }
         return criteriaBuilder.exists(subquery);
-    }
-
-    @Override
-    public boolean nonNull() {
-        return this.express.nonNull();
     }
 }

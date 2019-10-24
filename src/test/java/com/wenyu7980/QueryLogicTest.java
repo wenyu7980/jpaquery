@@ -62,18 +62,18 @@ public class QueryLogicTest {
         CriteriaQuery<UserEntity> query = criteriaBuilder
                 .createQuery(UserEntity.class);
         Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryCondition
+        QueryLogic logic = QueryLogic.and(QueryConditionNull
                         .of("username", QueryCompare.EQ, "username1"), QueryJoin
-                        .join("info", QueryLogic.and(QueryCondition
+                        .join("info", QueryLogic.and(QueryConditionNull
                                 .of("info", QueryCompare.LIKE, "info"), QueryJoin
-                                .join("address", QueryLogic.and(QueryCondition
+                                .join("address", QueryLogic.and(QueryConditionNull
                                         .of("address", QueryCompare.NE, "add"))))),
-                QueryJoin.join("mobile", QueryCondition
+                QueryJoin.join("mobile", QueryConditionNull
                         .of("mobile", QueryCompare.IN, "mobilex1")));
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query)
                 .getResultList();
-        Assert.assertTrue(list.size() == 1);
+        Assert.assertEquals(1, list.size());
         Assert.assertEquals(list.get(0).getId(), "user1");
     }
 
@@ -87,11 +87,29 @@ public class QueryLogicTest {
         Root<UserEntity> root = query.from(UserEntity.class);
         QueryLogic logic = QueryLogic.and(QueryExists
                 .exists("mobile", "id", MobileEntity.class,
-                        QueryCondition.of("mobile", QueryCompare.NOTNULL)));
+                        QueryConditionNull.of("mobile", QueryCompare.NOTNULL)));
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query)
                 .getResultList();
-        Assert.assertTrue(list.size() == 2);
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsNull() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        String nullStr = null;
+        QueryLogic logic = QueryLogic.and(QueryExistsNull
+                .exists("mobile", "id", MobileEntity.class,
+                        QueryCondition.of("mobile", QueryCompare.EQ, nullStr)));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(2, list.size());
     }
 
     @Test
@@ -103,21 +121,18 @@ public class QueryLogicTest {
                 .createQuery(UserEntity.class);
         Root<UserEntity> root = query.from(UserEntity.class);
         String nullStr = null;
-        QueryLogic logic = QueryLogic
-                .and(QueryCondition.of("username", QueryCompare.EQ, nullStr),
-                        QueryJoin.join("info", QueryLogic.and(QueryCondition
-                                        .of("info", QueryCompare.LIKE, nullStr),
-                                QueryJoin.join("address", QueryLogic
-                                        .and(QueryCondition
-                                                .of("address", QueryCompare.NE,
-                                                        nullStr))))), QueryJoin
-                                .join("mobile", QueryCondition
-                                        .of("mobile", QueryCompare.EQ,
-                                                nullStr)));
+        QueryLogic logic = QueryLogic.and(QueryConditionNull
+                        .of("username", QueryCompare.EQ, nullStr), QueryJoin
+                        .join("info", QueryLogic.and(QueryConditionNull
+                                .of("info", QueryCompare.LIKE, nullStr), QueryJoin
+                                .join("address", QueryLogic.and(QueryConditionNull
+                                        .of("address", QueryCompare.NE, nullStr))))),
+                QueryJoin.join("mobile", QueryConditionNull
+                        .of("mobile", QueryCompare.EQ, nullStr)));
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query)
                 .getResultList();
-        Assert.assertTrue(list.size() == 2);
+        Assert.assertEquals(0, list.size());
     }
 
     @Test
@@ -132,7 +147,66 @@ public class QueryLogicTest {
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query)
                 .getResultList();
-        Assert.assertTrue(list.size() == 2);
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicXor() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryPredicateExpress express = QueryLogicXor.xor(QueryConditionNull
+                        .of("username", QueryCompare.EQ, "usernamex1"),
+                QueryConditionNull
+                        .of("username", QueryCompare.NE, "usernamex1"));
+        query.where(express.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testConditionNull() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        String nullStr = null;
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryPredicateExpress express = QueryConditionNull
+                .of("username", QueryCompare.EQ, nullStr);
+        query.where(express.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(0, list.size());
+    }
+
+    @Test
+    public void testNonNull3() {
+
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        String nullStr = null;
+        QueryLogic logic = QueryLogic.and(QueryConditionNull
+                        .of("username", QueryCompare.EQ, nullStr), QueryJoin
+                        .join("info", QueryLogic.and(QueryConditionNull
+                                .of("info", QueryCompare.LIKE, nullStr), QueryJoin
+                                .join("address", QueryLogic.and(QueryConditionNull
+                                        .of("address", QueryCompare.NE, nullStr))))),
+                QueryJoin.join("mobile", QueryConditionNull
+                        .of("mobile", QueryCompare.EQ, nullStr)));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(0, list.size());
     }
 
     public void insertData(int i) {

@@ -20,13 +20,13 @@ import javax.persistence.criteria.Predicate;
  */
 
 /**
- * 逻辑表达式
+ * 判定表单式
  * @author:wenyu
  * @date:2019/10/22
  */
-public interface QueryLogicExpress {
+public interface QueryPredicateExpress {
     /**
-     * predicate 谓语表达式
+     * 判定表达式转换为JPA的判定表单式
      * @param from
      * @param criteriaBuilder
      * @return
@@ -35,8 +35,10 @@ public interface QueryLogicExpress {
             final CriteriaBuilder criteriaBuilder);
 
     /**
-     * 是否不为空
+     * 判定表达式的比较值是否为非空
      * @return
      */
-    boolean nonNull();
+    default boolean nonNull() {
+        return true;
+    }
 }
