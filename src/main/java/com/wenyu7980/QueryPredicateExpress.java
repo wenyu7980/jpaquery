@@ -27,8 +27,8 @@ import javax.persistence.criteria.Predicate;
 public interface QueryPredicateExpress {
     /**
      * 判定表达式转换为JPA的判定表单式
-     * @param from
-     * @param criteriaBuilder
+     * @param from 表
+     * @param criteriaBuilder 标准构造器
      * @return
      */
     Predicate predicate(final From<?, ?> from,
