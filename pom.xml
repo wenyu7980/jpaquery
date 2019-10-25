@@ -6,7 +6,7 @@
 
     <groupId>com.wenyu7980</groupId>
     <artifactId>jpaQuery</artifactId>
-    <version>0.0.3</version>
+    <version>1.0.1</version>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.hibernate.javax.persistence/hibernate-jpa-2.1-api -->
         <dependency>
