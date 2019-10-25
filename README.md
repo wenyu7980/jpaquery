@@ -39,43 +39,43 @@ public interface QueryPredicateExpress {
 ```
 ## 具体实现类
 + QueryCondition
-条件判断
+>条件判断
 使用QueryCompare枚举，主要是等于，不等于，大于，Like，in,null 等
 如果判断值为null时，则**不会**参与到判断中
 + QueryConditionExpression
-条件判断
+>条件判断
 使用QueryCompare枚举，主要是等于，不等于，大于，Like，in,null 等
 判断值使用的是表中字段，例如 select * from A a where a.b = a.c
 + QueryConditionNull
-条件判断
+>条件判断
 使用QueryCompare枚举，主要是等于，不等于，大于，Like，in,null 等
 如果判断值为null时，依旧会参与到判断中
 + QueryExists
-存在判断
+>存在判断
 如果logic的nonNull为false时，则**不会**参与到判断中
 + QueryExistsNull
-存在判断
+>存在判断
 存在判断
 如果logic的nonNull为false时，依旧会参与到判断中
 + QueryJoin
-表拦截
+>表拦截
 如果logic的nonNull为false时，则**不会**参与到判断中
 + QueryLogic
-逻辑
+>逻辑
 与 and 或 or 非 not
 QueryLogicXor
-异或 xor
+>异或 xor
 
-##使用
-###表结构 表A：
+## 使用
+### 表结构 表A：
 |id|name|age|
 |----|----|----|
 |1|Tom|18|
 |2|Jerry|19|
-###SQL：
+### SQL：
 SELECT * FROM A a WHERE a.id = ? and a.name = ? and a.age = ?;
 
-###JPA查询：
+### JPA查询：
 ```java
 QueryPredicateExpress express = QueryLogic.and(
     QueryCondition.of("id",EQ,id),
@@ -83,7 +83,7 @@ QueryPredicateExpress express = QueryLogic.and(
     QueryCondition.of("age",EQ,age)
 );
 ```
-###Spring Data：
+### Spring Data：
 ```java
 public class QueryService<T> {
     @Autowired
