@@ -1,4 +1,4 @@
-package com.wenyu7980;
+package com.wenyu7980.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;

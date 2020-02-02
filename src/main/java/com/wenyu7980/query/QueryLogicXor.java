@@ -1,4 +1,4 @@
-package com.wenyu7980;
+package com.wenyu7980.query;
 
 /**
  * Copyright wenyu

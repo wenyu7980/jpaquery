@@ -1,12 +1,12 @@
-package com.wenyu7980;
+package com.wenyu7980.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 /**
  * Copyright wenyu
  *
@@ -24,22 +24,22 @@ import java.util.List;
  */
 
 /**
- * 条件表单式
+ * 条件表单式 非空生效
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryConditionNull<T extends Comparable<T>>
+public class QueryCondition<T extends Comparable<T>>
         implements QueryPredicateExpress {
 
     private String name;
     private QueryCompare compare;
     private List<T> values;
 
-    private QueryConditionNull(String name, QueryCompare compare,
-            List<T> values) {
+    private QueryCondition(String name, QueryCompare compare, List<T> values) {
         this.name = name;
         this.compare = compare;
-        this.values = values;
+        this.values = values.stream().filter(value -> Objects.nonNull(value))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -50,9 +50,9 @@ public class QueryConditionNull<T extends Comparable<T>>
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<T>> QueryConditionNull<T> of(
-            String name, QueryCompare compare, List<T> values) {
-        return new QueryConditionNull<>(name, compare, values);
+    public static <T extends Comparable<T>> QueryCondition<T> of(String name,
+            QueryCompare compare, List<T> values) {
+        return new QueryCondition<>(name, compare, values);
     }
 
     /**
@@ -63,21 +63,21 @@ public class QueryConditionNull<T extends Comparable<T>>
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<T>> QueryConditionNull<T> of(
-            String name, QueryCompare compare, T... values) {
-        return new QueryConditionNull<>(name, compare, Arrays.asList(values));
+    public static <T extends Comparable<T>> QueryCondition<T> of(String name,
+            QueryCompare compare, T... values) {
+        return new QueryCondition<>(name, compare, Arrays.asList(values));
     }
 
     @Override
     public Predicate predicate(final From<?, ?> from,
             final CriteriaBuilder criteriaBuilder) {
-        if (nonNull()) {
-            return compare.predicate(from.get(this.name), criteriaBuilder,
-                    this.values);
-        }
-        List<Expression<T>> list = new ArrayList<>();
-        list.add(criteriaBuilder.nullLiteral(null));
-        return compare.predicateExpression(from.get(this.name), criteriaBuilder,
-                list);
+        return compare
+                .predicate(from.get(this.name), criteriaBuilder, this.values);
+
+    }
+
+    @Override
+    public boolean nonNull() {
+        return this.values != null && this.values.size() > 0;
     }
 }

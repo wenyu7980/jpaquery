@@ -1,9 +1,9 @@
-package com.wenyu7980;
+package com.wenyu7980.query;
 
-import com.wenyu7980.entity.AddressEntity;
-import com.wenyu7980.entity.InfoEntity;
-import com.wenyu7980.entity.MobileEntity;
-import com.wenyu7980.entity.UserEntity;
+import com.wenyu7980.query.entity.AddressEntity;
+import com.wenyu7980.query.entity.InfoEntity;
+import com.wenyu7980.query.entity.MobileEntity;
+import com.wenyu7980.query.entity.UserEntity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

@@ -1,4 +1,4 @@
-package com.wenyu7980.entity;
+package com.wenyu7980.query.entity;
 
 import javax.persistence.*;
 import java.util.List;
