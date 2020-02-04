@@ -1,6 +1,7 @@
 package com.wenyu7980.query;
 
 import javax.persistence.criteria.*;
+import java.util.Objects;
 /**
  * Copyright wenyu
  *
@@ -58,5 +59,40 @@ public class QueryExists implements QueryPredicateExpress {
     @Override
     public boolean nonNull() {
         return this.express.nonNull();
+    }
+
+    @Override
+    public boolean merge(QueryPredicateExpress express,
+            QueryPredicateExpress parent) {
+        if (express instanceof QueryExists) {
+            QueryExists exists = (QueryExists) express;
+            if (Objects.equals(exists.name, this.name) && Objects
+                    .equals(exists.subName, this.subName) && Objects
+                    .equals(exists.clazz, exists.clazz)) {
+                this.express = parent.logic(this.express, exists.express);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        QueryExists exists = (QueryExists) object;
+        return Objects.equals(name, exists.name) && Objects
+                .equals(subName, exists.subName) && Objects
+                .equals(express, exists.express) && Objects
+                .equals(clazz, exists.clazz);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, subName, express, clazz);
     }
 }

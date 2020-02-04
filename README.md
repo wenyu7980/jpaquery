@@ -1,6 +1,13 @@
 ﻿
 
 # JPA查询
+
+v2.0.0
+
+新增逻辑合并功能
+
+
+
 -----------------
 
 ***JPA***是Java Persistence API的简称，中文名Java持久层API，是JDK 5.0注解或XML描述对象－关系表的映射关系（***ORM***），并将运行期的实体对象持久化到数据库中。
@@ -34,6 +41,29 @@ public interface QueryPredicateExpress {
      */
     default boolean nonNull() {
         return true;
+    }
+    
+    /**
+     * 合并
+     * @param express
+     * @param parent    上级
+     * @return true 合并
+     *         false 未合并
+     */
+    default boolean merge(QueryPredicateExpress express,
+            QueryPredicateExpress parent) {
+        return false;
+    }
+
+    /**
+     * 逻辑运算
+     * @param e1
+     * @param e2
+     * @return
+     */
+    default QueryPredicateExpress logic(QueryPredicateExpress e1,
+            QueryPredicateExpress e2) {
+        return null;
     }
 }
 ```
