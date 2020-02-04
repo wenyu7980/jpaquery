@@ -3,6 +3,7 @@ package com.wenyu7980.query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+import java.util.Objects;
 /**
  * Copyright wenyu
  *
@@ -53,5 +54,18 @@ public class QueryJoin implements QueryPredicateExpress {
     @Override
     public boolean nonNull() {
         return this.express.nonNull();
+    }
+
+    @Override
+    public boolean merge(QueryPredicateExpress express,
+            QueryPredicateExpress parent) {
+        if (express instanceof QueryJoin) {
+            QueryJoin join = (QueryJoin) express;
+            if (Objects.equals(join.name, this.name)) {
+                this.express = parent.logic(this.express, join.express);
+                return true;
+            }
+        }
+        return false;
     }
 }

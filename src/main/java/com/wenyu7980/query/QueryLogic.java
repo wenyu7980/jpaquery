@@ -3,9 +3,7 @@ package com.wenyu7980.query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 /**
  * Copyright wenyu
  *
@@ -52,6 +50,17 @@ public class QueryLogic implements QueryPredicateExpress {
                     Predicate... predicates) {
                 return predicates[0].not();
             }
+        },
+        // 异或
+        XOR() {
+            @Override
+            public Predicate predicate(final CriteriaBuilder criteriaBuilder,
+                    Predicate... predicates) {
+                return criteriaBuilder.or(criteriaBuilder
+                                .and(predicates[0], predicates[1].not()),
+                        criteriaBuilder
+                                .and(predicates[0].not(), predicates[1]));
+            }
         };
 
         /**
@@ -69,9 +78,29 @@ public class QueryLogic implements QueryPredicateExpress {
     /** 逻辑列表 */
     protected List<QueryPredicateExpress> expresses = new ArrayList<>();
 
-    protected QueryLogic(Logic logic, QueryPredicateExpress... express) {
+    protected QueryLogic(Logic logic, QueryPredicateExpress... expresses) {
+        this(logic, Arrays.asList(expresses));
+    }
+
+    protected QueryLogic(Logic logic,
+            Collection<QueryPredicateExpress> expresses) {
         this.logic = logic;
-        this.expresses.addAll(Arrays.asList(express));
+        out:
+        for (final QueryPredicateExpress e : expresses) {
+            if (this.equals(e) || this.merge(e, this)) {
+                continue out;
+            }
+            this.addExpress(e);
+        }
+    }
+
+    private void addExpress(QueryPredicateExpress express) {
+        for (QueryPredicateExpress e : this.expresses) {
+            if (Objects.equals(e, express) || e.merge(express, this)) {
+                return;
+            }
+        }
+        this.expresses.add(express);
     }
 
     /**
@@ -80,6 +109,10 @@ public class QueryLogic implements QueryPredicateExpress {
      * @return
      */
     public static QueryLogic and(QueryPredicateExpress... expresses) {
+        return new QueryLogic(Logic.AND, expresses);
+    }
+
+    public static QueryLogic and(Collection<QueryPredicateExpress> expresses) {
         return new QueryLogic(Logic.AND, expresses);
     }
 
@@ -92,6 +125,10 @@ public class QueryLogic implements QueryPredicateExpress {
         return new QueryLogic(Logic.OR, expresses);
     }
 
+    public static QueryLogic or(Collection<QueryPredicateExpress> expresses) {
+        return new QueryLogic(Logic.OR, expresses);
+    }
+
     /**
      * 非
      * @param express
@@ -99,6 +136,17 @@ public class QueryLogic implements QueryPredicateExpress {
      */
     public static QueryLogic not(QueryPredicateExpress express) {
         return new QueryLogic(Logic.NOT, express);
+    }
+
+    /**
+     * 异或
+     * @param left
+     * @param right
+     * @return
+     */
+    public static QueryLogic xor(QueryPredicateExpress left,
+            QueryPredicateExpress right) {
+        return new QueryLogic(Logic.XOR, left, right);
     }
 
     @Override
@@ -119,5 +167,59 @@ public class QueryLogic implements QueryPredicateExpress {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean merge(QueryPredicateExpress express,
+            QueryPredicateExpress parent) {
+        if (express instanceof QueryLogic) {
+            QueryLogic other = (QueryLogic) express;
+            if (Objects.equals(other.logic, this.logic)
+                    && this.logic != Logic.NOT && this.logic != Logic.XOR) {
+                // 结合律
+                for (QueryPredicateExpress e : other.expresses) {
+                    this.addExpress(e);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public QueryPredicateExpress logic(QueryPredicateExpress e1,
+            QueryPredicateExpress e2) {
+        assert this.logic != Logic.XOR && this.logic != Logic.NOT;
+        return new QueryLogic(this.logic, e1, e2);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        QueryLogic logic1 = (QueryLogic) object;
+        if (logic != logic1.logic || this.expresses.size() != logic1.expresses
+                .size()) {
+            return false;
+        }
+        out:
+        for (QueryPredicateExpress express : this.expresses) {
+            for (QueryPredicateExpress e : logic1.expresses) {
+                if (Objects.equals(express, e)) {
+                    continue out;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(logic, expresses);
     }
 }

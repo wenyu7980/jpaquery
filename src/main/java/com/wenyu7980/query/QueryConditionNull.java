@@ -7,6 +7,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 /**
  * Copyright wenyu
  *
@@ -79,5 +80,23 @@ public class QueryConditionNull<T extends Comparable<T>>
         list.add(criteriaBuilder.nullLiteral(null));
         return compare.predicateExpression(from.get(this.name), criteriaBuilder,
                 list);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        QueryConditionNull<?> that = (QueryConditionNull<?>) object;
+        return Objects.equals(name, that.name) && compare == that.compare
+                && Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, compare, values);
     }
 }

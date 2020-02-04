@@ -41,4 +41,27 @@ public interface QueryPredicateExpress {
     default boolean nonNull() {
         return true;
     }
+
+    /**
+     * 合并
+     * @param express
+     * @param parent    上级
+     * @return true 合并
+     *         false 未合并
+     */
+    default boolean merge(QueryPredicateExpress express,
+            QueryPredicateExpress parent) {
+        return false;
+    }
+
+    /**
+     * 逻辑运算
+     * @param e1
+     * @param e2
+     * @return
+     */
+    default QueryPredicateExpress logic(QueryPredicateExpress e1,
+            QueryPredicateExpress e2) {
+        return null;
+    }
 }

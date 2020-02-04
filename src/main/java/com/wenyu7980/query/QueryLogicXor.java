@@ -24,7 +24,10 @@ import javax.persistence.criteria.Predicate;
  * 逻辑表达式-异或
  * @author:wenyu
  * @date:2019/10/22
+ * 2.0.0后删除
+ * 请使用QueryLogic.xor
  */
+@Deprecated
 public class QueryLogicXor implements QueryPredicateExpress {
     /** 左 */
     private QueryPredicateExpress left;

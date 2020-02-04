@@ -80,4 +80,22 @@ public class QueryCondition<T extends Comparable<T>>
     public boolean nonNull() {
         return this.values != null && this.values.size() > 0;
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        QueryCondition<?> that = (QueryCondition<?>) object;
+        return Objects.equals(name, that.name) && compare == that.compare
+                && Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, compare, values);
+    }
 }
