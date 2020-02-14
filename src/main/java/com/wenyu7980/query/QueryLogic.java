@@ -152,11 +152,14 @@ public class QueryLogic implements QueryPredicateExpress {
     @Override
     public Predicate predicate(final From<?, ?> from,
             final CriteriaBuilder criteriaBuilder) {
-        Predicate[] predicates = new Predicate[this.expresses.size()];
-        for (int i = 0; i < expresses.size(); i++) {
-            predicates[i] = expresses.get(i).predicate(from, criteriaBuilder);
+        List<Predicate> predicates = new ArrayList<>(this.expresses.size());
+        for (QueryPredicateExpress express : expresses) {
+            if (express.nonNull()) {
+                predicates.add(express.predicate(from, criteriaBuilder));
+            }
         }
-        return this.logic.predicate(criteriaBuilder, predicates);
+        return this.logic.predicate(criteriaBuilder,
+                predicates.toArray(new Predicate[predicates.size()]));
     }
 
     @Override
