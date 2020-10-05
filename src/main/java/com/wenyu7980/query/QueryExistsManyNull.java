@@ -20,26 +20,29 @@ import java.util.Objects;
 
 /**
  * 存在表达式
+ * ManyToMany
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryExists implements QueryPredicateExpress {
-    private String name;
-    private String subName;
+public class QueryExistsManyNull implements QueryPredicateExpress {
+    private String id;
+    private String subId;
+    private String subJoin;
     private QueryPredicateExpress express;
     private Class<?> clazz;
 
-    private QueryExists(String name, String subName, Class<?> clazz,
-            QueryPredicateExpress express) {
-        this.name = name;
-        this.subName = subName;
+    private QueryExistsManyNull(String id, String subId, String subJoin,
+            Class<?> clazz, QueryPredicateExpress express) {
+        this.id = id;
+        this.subId = subId;
+        this.subJoin = subJoin;
         this.express = express;
         this.clazz = clazz;
     }
 
-    public static QueryExists exists(String name, String subName,
-            Class<?> clazz, QueryPredicateExpress express) {
-        return new QueryExists(name, subName, clazz, express);
+    public static QueryExistsManyNull exists(String id, String subId,
+            String subJoin, Class<?> clazz, QueryPredicateExpress express) {
+        return new QueryExistsManyNull(id, subId, subJoin, clazz, express);
     }
 
     @Override
@@ -48,31 +51,22 @@ public class QueryExists implements QueryPredicateExpress {
         CriteriaQuery<?> criteria = criteriaBuilder.createQuery(clazz);
         Subquery<?> subquery = criteria.subquery(clazz);
         Root<?> subRoot = subquery.from(clazz);
-        subquery.select(subRoot.get(subName));
+        subquery.select(subRoot.get(subId));
         subquery.where(criteriaBuilder
                 .and(express.predicate(subRoot, criteriaBuilder),
-                        criteriaBuilder
-                                .equal(from.get(name), subRoot.get(subName))));
+                        criteriaBuilder.equal(from.get(this.id),
+                                subRoot.join(this.subJoin).get(this.id))));
         return criteriaBuilder.exists(subquery);
-    }
-
-    @Override
-    public boolean nonNull() {
-        return this.express.nonNull();
     }
 
     @Override
     public boolean merge(QueryPredicateExpress express,
             QueryPredicateExpress parent) {
-        if (express instanceof QueryExists) {
-            QueryExists exists = (QueryExists) express;
-            if (Objects.equals(this.clazz, exists.clazz) && Objects
-                    .equals(exists.name, this.name) && Objects
-                    .equals(exists.subName, this.subName) && Objects
-                    .equals(exists.clazz, exists.clazz)) {
+        if (express instanceof QueryExistsManyNull) {
+            QueryExistsManyNull exists = (QueryExistsManyNull) express;
+            if (Objects.equals(this.clazz, exists.clazz)) {
                 this.express = parent.logic(this.express, exists.express);
                 return true;
-
             }
         }
         return false;
@@ -86,15 +80,16 @@ public class QueryExists implements QueryPredicateExpress {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        QueryExists exists = (QueryExists) object;
-        return Objects.equals(name, exists.name) && Objects
-                .equals(subName, exists.subName) && Objects
+        QueryExistsManyNull exists = (QueryExistsManyNull) object;
+        return Objects.equals(id, exists.id) && Objects
+                .equals(subId, exists.subId) && Objects
+                .equals(subJoin, exists.subJoin) && Objects
                 .equals(express, exists.express) && Objects
                 .equals(clazz, exists.clazz);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, subName, express, clazz);
+        return Objects.hash(id, subId, subJoin, express, clazz);
     }
 }

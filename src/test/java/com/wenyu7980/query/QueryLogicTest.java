@@ -1,9 +1,6 @@
 package com.wenyu7980.query;
 
-import com.wenyu7980.query.entity.AddressEntity;
-import com.wenyu7980.query.entity.InfoEntity;
-import com.wenyu7980.query.entity.MobileEntity;
-import com.wenyu7980.query.entity.UserEntity;
+import com.wenyu7980.query.entity.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -19,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -46,7 +44,8 @@ public class QueryLogicTest {
                 .addAnnotatedClass(MobileEntity.class)
                 .addAnnotatedClass(AddressEntity.class)
                 .addAnnotatedClass(InfoEntity.class)
-                .addAnnotatedClass(UserEntity.class).buildMetadata()
+                .addAnnotatedClass(UserEntity.class)
+                .addAnnotatedClass(LabelEntity.class).buildMetadata()
                 .buildSessionFactory();
         //打开会话
         session = sessionFactory.openSession();
@@ -88,6 +87,40 @@ public class QueryLogicTest {
         QueryLogic logic = QueryLogic.and(QueryExists
                 .exists("mobile", "id", MobileEntity.class,
                         QueryConditionNull.of("mobile", QueryCompare.NOTNULL)));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsMany() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryLogic logic = QueryLogic.and(QueryExistsMany
+                .exists("id", "id", "users", LabelEntity.class,
+                        QueryConditionNull.of("id", QueryCompare.NOTNULL)));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query)
+                .getResultList();
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsMany2() {
+        EntityManager entityManager = session.getEntityManagerFactory()
+                .createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder
+                .createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryLogic logic = QueryLogic.and(QueryExistsMany
+                .exists("id", "id", "users", LabelEntity.class,
+                        QueryLogic.and()));
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query)
                 .getResultList();
@@ -256,6 +289,10 @@ public class QueryLogicTest {
     public void insertData(int i) {
         //打开事务
         Transaction transaction = session.beginTransaction();
+        LabelEntity labelEntity1 = new LabelEntity("L" + i, "LABEL1");
+        session.save(labelEntity1);
+        LabelEntity labelEntity2 = new LabelEntity("L" + i + "x", "LABEL1");
+        session.save(labelEntity2);
         AddressEntity addressEntity = new AddressEntity("address" + i,
                 "addressx" + 1);
         InfoEntity infoEntity = new InfoEntity("info" + i, "infox" + i,
@@ -263,7 +300,8 @@ public class QueryLogicTest {
         MobileEntity mobileEntity = new MobileEntity("mobile" + i,
                 "mobilex" + i);
         UserEntity userEntity = new UserEntity("user" + i, "username" + i,
-                infoEntity, mobileEntity);
+                infoEntity, mobileEntity,
+                Arrays.asList(labelEntity1, labelEntity2));
         session.save(addressEntity);
         session.save(infoEntity);
         session.save(mobileEntity);

@@ -29,7 +29,7 @@ public class QueryExistsNull implements QueryPredicateExpress {
     private QueryPredicateExpress express;
     private Class<?> clazz;
 
-    public QueryExistsNull(String name, String subName, Class<?> clazz,
+    private QueryExistsNull(String name, String subName, Class<?> clazz,
             QueryPredicateExpress express) {
         this.name = name;
         this.subName = subName;

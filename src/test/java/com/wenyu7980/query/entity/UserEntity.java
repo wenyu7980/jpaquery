@@ -1,6 +1,9 @@
 package com.wenyu7980.query.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -20,16 +23,20 @@ public class UserEntity {
     @ManyToOne
     @JoinColumn(name = "mobile_id")
     private MobileEntity mobile;
+    @ManyToMany
+    @JoinTable(name = "test_label_user", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "label_id"))
+    private List<LabelEntity> labels;
 
     public UserEntity() {
     }
 
     public UserEntity(String id, String username, InfoEntity info,
-            MobileEntity mobile) {
+            MobileEntity mobile, Collection<LabelEntity> labels) {
         this.id = id;
         this.username = username;
         this.info = info;
         this.mobile = mobile;
+        this.labels = new ArrayList<>(labels);
     }
 
     public String getId() {
@@ -63,4 +70,5 @@ public class UserEntity {
     public void setMobile(MobileEntity mobile) {
         this.mobile = mobile;
     }
+
 }

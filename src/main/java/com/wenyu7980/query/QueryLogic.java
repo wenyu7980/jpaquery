@@ -74,9 +74,9 @@ public class QueryLogic implements QueryPredicateExpress {
     }
 
     /** 逻辑符号 */
-    protected Logic logic;
+    private final Logic logic;
     /** 逻辑列表 */
-    protected List<QueryPredicateExpress> expresses = new ArrayList<>();
+    private final List<QueryPredicateExpress> expresses = new ArrayList<>();
 
     protected QueryLogic(Logic logic, QueryPredicateExpress... expresses) {
         this(logic, Arrays.asList(expresses));

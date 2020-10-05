@@ -1,11 +1,21 @@
 ﻿
 
 # JPA查询
+```xml
+<!-- https://mvnrepository.com/artifact/com.wenyu7980/statemachine -->
+<dependency>
+    <groupId>com.wenyu7980</groupId>
+    <artifactId>jpaQuery</artifactId>
+    <version>{version}</version>
+</dependency>
+```
 
 v2.0.0
 
 新增逻辑合并功能
 
+v2.1.0
+新增ManyToMany的exist查询
 
 
 -----------------
