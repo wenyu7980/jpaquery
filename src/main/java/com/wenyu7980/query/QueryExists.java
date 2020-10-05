@@ -2,6 +2,7 @@ package com.wenyu7980.query;
 
 import javax.persistence.criteria.*;
 import java.util.Objects;
+import java.util.function.Function;
 /**
  * Copyright wenyu
  *
@@ -23,36 +24,40 @@ import java.util.Objects;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryExists implements QueryPredicateExpress {
-    private String name;
-    private String subName;
+public class QueryExists<T> implements QueryPredicateExpress {
+    private QueryExistPredicate joinPredicate;
+    private Function<From<?, ?>, Expression<?>> subSelect;
     private QueryPredicateExpress express;
-    private Class<?> clazz;
+    private Class<T> clazz;
 
-    private QueryExists(String name, String subName, Class<?> clazz,
+    protected QueryExists(Class<T> clazz, QueryExistPredicate joinPredicate,
             QueryPredicateExpress express) {
-        this.name = name;
-        this.subName = subName;
+        this.joinPredicate = joinPredicate;
         this.express = express;
         this.clazz = clazz;
     }
 
-    public static QueryExists exists(String name, String subName,
-            Class<?> clazz, QueryPredicateExpress express) {
-        return new QueryExists(name, subName, clazz, express);
+    public static <T> QueryExists exists(Class<T> clazz,
+            QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
+        return new QueryExists(clazz, joinPredicate, express);
     }
 
     @Override
     public Predicate predicate(From<?, ?> from,
             CriteriaBuilder criteriaBuilder) {
         CriteriaQuery<?> criteria = criteriaBuilder.createQuery(clazz);
-        Subquery<?> subquery = criteria.subquery(clazz);
-        Root<?> subRoot = subquery.from(clazz);
-        subquery.select(subRoot.get(subName));
-        subquery.where(criteriaBuilder
-                .and(express.predicate(subRoot, criteriaBuilder),
-                        criteriaBuilder
-                                .equal(from.get(name), subRoot.get(subName))));
+        Subquery<T> subquery = criteria.subquery(clazz);
+        Root<T> subRoot = subquery.from(clazz);
+        subquery.select(subRoot);
+        if (express.nonNull()) {
+            subquery.where(criteriaBuilder
+                    .and(express.predicate(subRoot, criteriaBuilder),
+                            this.joinPredicate
+                                    .apply(from, subRoot, criteriaBuilder)));
+        } else {
+            subquery.where(
+                    this.joinPredicate.apply(from, subRoot, criteriaBuilder));
+        }
         return criteriaBuilder.exists(subquery);
     }
 
@@ -67,9 +72,7 @@ public class QueryExists implements QueryPredicateExpress {
         if (express instanceof QueryExists) {
             QueryExists exists = (QueryExists) express;
             if (Objects.equals(this.clazz, exists.clazz) && Objects
-                    .equals(exists.name, this.name) && Objects
-                    .equals(exists.subName, this.subName) && Objects
-                    .equals(exists.clazz, exists.clazz)) {
+                    .equals(this.joinPredicate, exists.joinPredicate)) {
                 this.express = parent.logic(this.express, exists.express);
                 return true;
 
@@ -87,14 +90,13 @@ public class QueryExists implements QueryPredicateExpress {
             return false;
         }
         QueryExists exists = (QueryExists) object;
-        return Objects.equals(name, exists.name) && Objects
-                .equals(subName, exists.subName) && Objects
+        return Objects.equals(joinPredicate, exists.joinPredicate) && Objects
                 .equals(express, exists.express) && Objects
                 .equals(clazz, exists.clazz);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, subName, express, clazz);
+        return Objects.hash(joinPredicate, express, clazz);
     }
 }
