@@ -22,14 +22,12 @@ package com.wenyu7980.query;
  * @date:2019/10/22
  */
 public class QueryExistsNull<T> extends QueryExists<T> {
-    private QueryExistsNull(Class<T> clazz, QueryExistPredicate joinPredicate,
-
-            QueryPredicateExpress express) {
+    private QueryExistsNull(Class<T> clazz, QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
         super(clazz, joinPredicate, express);
     }
 
-    public static <T> QueryExistsNull exists(Class<T> clazz,
-            QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
+    public static <T> QueryExistsNull exists(Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
         return new QueryExistsNull(clazz, joinPredicate, express);
     }
 

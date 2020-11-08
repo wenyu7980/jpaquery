@@ -30,33 +30,28 @@ public class QueryExists<T> implements QueryPredicateExpress {
     private QueryPredicateExpress express;
     private Class<T> clazz;
 
-    protected QueryExists(Class<T> clazz, QueryExistPredicate joinPredicate,
-            QueryPredicateExpress express) {
+    protected QueryExists(Class<T> clazz, QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
         this.joinPredicate = joinPredicate;
         this.express = express;
         this.clazz = clazz;
     }
 
-    public static <T> QueryExists exists(Class<T> clazz,
-            QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
+    public static <T> QueryExists exists(Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
         return new QueryExists(clazz, joinPredicate, express);
     }
 
     @Override
-    public Predicate predicate(From<?, ?> from,
-            CriteriaBuilder criteriaBuilder) {
+    public Predicate predicate(From<?, ?> from, CriteriaBuilder criteriaBuilder) {
         CriteriaQuery<?> criteria = criteriaBuilder.createQuery(clazz);
         Subquery<T> subquery = criteria.subquery(clazz);
         Root<T> subRoot = subquery.from(clazz);
         subquery.select(subRoot);
         if (express.nonNull()) {
-            subquery.where(criteriaBuilder
-                    .and(express.predicate(subRoot, criteriaBuilder),
-                            this.joinPredicate
-                                    .apply(from, subRoot, criteriaBuilder)));
+            subquery.where(criteriaBuilder.and(express.predicate(subRoot, criteriaBuilder),
+              this.joinPredicate.apply(from, subRoot, criteriaBuilder)));
         } else {
-            subquery.where(
-                    this.joinPredicate.apply(from, subRoot, criteriaBuilder));
+            subquery.where(this.joinPredicate.apply(from, subRoot, criteriaBuilder));
         }
         return criteriaBuilder.exists(subquery);
     }
@@ -67,12 +62,10 @@ public class QueryExists<T> implements QueryPredicateExpress {
     }
 
     @Override
-    public boolean merge(QueryPredicateExpress express,
-            QueryPredicateExpress parent) {
+    public boolean merge(QueryPredicateExpress express, QueryPredicateExpress parent) {
         if (express instanceof QueryExists) {
             QueryExists exists = (QueryExists) express;
-            if (Objects.equals(this.clazz, exists.clazz) && Objects
-                    .equals(this.joinPredicate, exists.joinPredicate)) {
+            if (Objects.equals(this.clazz, exists.clazz) && Objects.equals(this.joinPredicate, exists.joinPredicate)) {
                 this.express = parent.logic(this.express, exists.express);
                 return true;
 
@@ -90,9 +83,8 @@ public class QueryExists<T> implements QueryPredicateExpress {
             return false;
         }
         QueryExists exists = (QueryExists) object;
-        return Objects.equals(joinPredicate, exists.joinPredicate) && Objects
-                .equals(express, exists.express) && Objects
-                .equals(clazz, exists.clazz);
+        return Objects.equals(joinPredicate, exists.joinPredicate) && Objects.equals(express, exists.express) && Objects
+          .equals(clazz, exists.clazz);
     }
 
     @Override

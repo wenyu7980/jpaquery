@@ -25,17 +25,19 @@ import java.util.stream.Collectors;
  */
 
 /**
- * 条件表单式 非空生效
+ * 条件表单式
  * @author:wenyu
  * @date:2019/10/22
  */
 public class QueryCondition<T extends Comparable<T>> implements QueryPredicateExpress {
 
+    private boolean condition;
     private String name;
     private QueryCompare compare;
     private List<T> values;
 
-    private QueryCondition(String name, QueryCompare compare, Collection<T> values) {
+    private QueryCondition(boolean condition, String name, QueryCompare compare, Collection<T> values) {
+        this.condition = condition;
         this.name = name;
         this.compare = compare;
         this.values = values.stream().filter(value -> Objects.nonNull(value)).collect(Collectors.toList());
@@ -51,7 +53,7 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      */
     public static <T extends Comparable<T>> QueryCondition<T> of(String name, QueryCompare compare,
       Collection<T> values) {
-        return new QueryCondition<>(name, compare, values);
+        return new QueryCondition<>(true, name, compare, values);
     }
 
     /**
@@ -63,18 +65,47 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      * @return
      */
     public static <T extends Comparable<T>> QueryCondition<T> of(String name, QueryCompare compare, T... values) {
-        return new QueryCondition<>(name, compare, Arrays.asList(values));
+        return new QueryCondition<>(true, name, compare, Arrays.asList(values));
+    }
+
+    /**
+     * 查询条件
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     * @since 3.0.0
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> of(boolean condition, String name, QueryCompare compare,
+      Collection<T> values) {
+        return new QueryCondition<>(condition, name, compare, values);
+    }
+
+    /**
+     * 查询条件
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     * @since 3.0.0
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> of(boolean condition, String name, QueryCompare compare,
+      T... values) {
+        return new QueryCondition<>(condition, name, compare, Arrays.asList(values));
     }
 
     @Override
     public Predicate predicate(final From<?, ?> from, final CriteriaBuilder criteriaBuilder) {
         return compare.predicate(from.get(this.name), criteriaBuilder, this.values);
-
     }
 
     @Override
     public boolean nonNull() {
-        return this.compare.nonNullCheck() && this.values != null && this.values.size() > 0;
+        return this.condition && this.compare.nonNullCheck() && this.values != null && this.values.size() > 0;
     }
 
     @Override
