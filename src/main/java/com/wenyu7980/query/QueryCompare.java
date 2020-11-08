@@ -29,166 +29,151 @@ public enum QueryCompare {
     /** 等于 */
     EQ() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return criteriaBuilder.equal(expression, values.get(0));
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return criteriaBuilder.equal(expression, values.get(0));
         }
     },
     /** 小于 */
     LT() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return criteriaBuilder.lessThan(expression, values.get(0));
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return criteriaBuilder.lessThan(expression, values.get(0));
         }
     },
     /** 不等于 */
     NE() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return EQ.predicate(expression, criteriaBuilder, values).not();
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
-            return EQ.predicateExpression(expression, criteriaBuilder, values)
-                    .not();
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
+            return EQ.predicateExpression(expression, criteriaBuilder, values).not();
         }
     },
     /** 小于等于 */
     LE() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return criteriaBuilder.lessThanOrEqualTo(expression, values.get(0));
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return criteriaBuilder.lessThanOrEqualTo(expression, values.get(0));
         }
     },
     /** 大于 */
     GT() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return criteriaBuilder.greaterThan(expression, values.get(0));
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return criteriaBuilder.greaterThan(expression, values.get(0));
         }
     },
     /** 大于等于 */
     GE() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
-            return criteriaBuilder
-                    .greaterThanOrEqualTo(expression, values.get(0));
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
+            return criteriaBuilder.greaterThanOrEqualTo(expression, values.get(0));
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
-            return criteriaBuilder
-                    .greaterThanOrEqualTo(expression, values.get(0));
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
+            return criteriaBuilder.greaterThanOrEqualTo(expression, values.get(0));
         }
     },
     /** 模糊查询 */
     LIKE() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
-            return criteriaBuilder.like((Expression<String>) expression,
-                    "%" + values.get(0) + "%");
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
+            return criteriaBuilder.like((Expression<String>) expression, "%" + values.get(0) + "%");
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return criteriaBuilder.like((Expression<String>) expression, "");
         }
     },
     /** 包含 */
     IN() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return expression.in(values);
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return expression.in(values);
         }
     },
     /** 空 */
     ISNULL() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return expression.isNull();
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return expression.isNull();
         }
 
+        @Override
+        public boolean nonNullCheck() {
+            return false;
+        }
     },
     /** 非空 */
     NOTNULL() {
         @Override
-        public <T extends Comparable<T>> Predicate predicate(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<T> values) {
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
             return expression.isNotNull();
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(
-                Expression<T> expression, CriteriaBuilder criteriaBuilder,
-                List<Expression<T>> values) {
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
             return expression.isNotNull();
+        }
+
+        @Override
+        public boolean nonNullCheck() {
+            return false;
         }
     };
 
@@ -199,9 +184,8 @@ public enum QueryCompare {
      * @param values
      * @return
      */
-    public abstract <T extends Comparable<T>> Predicate predicate(
-            final Expression<T> expression,
-            final CriteriaBuilder criteriaBuilder, List<T> values);
+    public abstract <T extends Comparable<T>> Predicate predicate(final Expression<T> expression,
+      final CriteriaBuilder criteriaBuilder, List<T> values);
 
     /**
      * 判定表达式转换为JPA的判定表单式 空
@@ -209,8 +193,11 @@ public enum QueryCompare {
      * @param criteriaBuilder
      * @return
      */
-    public abstract <T extends Comparable<T>> Predicate predicateExpression(
-            final Expression<T> expression,
-            final CriteriaBuilder criteriaBuilder, List<Expression<T>> values);
+    public abstract <T extends Comparable<T>> Predicate predicateExpression(final Expression<T> expression,
+      final CriteriaBuilder criteriaBuilder, List<Expression<T>> values);
+
+    public boolean nonNullCheck() {
+        return true;
+    }
 
 }
