@@ -105,7 +105,13 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
 
     @Override
     public boolean nonNull() {
-        return this.condition && this.compare.nonNullCheck() && this.values != null && this.values.size() > 0;
+        if (!this.condition) {
+            return true;
+        }
+        if (!this.compare.nonNullCheck()) {
+            return true;
+        }
+        return this.values != null && this.values.size() > 0;
     }
 
     @Override

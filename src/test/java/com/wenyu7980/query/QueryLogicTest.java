@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -205,5 +206,31 @@ public class QueryLogicTest {
         List<UserEntity> list = entityManager.createQuery(query).getResultList();
         Assert.assertEquals(1, list.size());
         Assert.assertEquals(list.get(0).getId(), "user1");
+    }
+
+    @Test
+    public void testInNull() {
+        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        List<String> list = new ArrayList<>();
+        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.IN_NULL, list));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> results = entityManager.createQuery(query).getResultList();
+        Assert.assertEquals(0, results.size());
+    }
+
+    @Test
+    public void testInNotNull() {
+        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        List<String> list = new ArrayList<>();
+        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.IN, list));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> results = entityManager.createQuery(query).getResultList();
+        Assert.assertEquals(2, results.size());
     }
 }

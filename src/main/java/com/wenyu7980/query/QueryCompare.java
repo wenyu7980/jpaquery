@@ -138,6 +138,28 @@ public enum QueryCompare {
             return expression.in(values);
         }
     },
+    /** 包含NULL */
+    IN_NULL() {
+        @Override
+        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
+          List<T> values) {
+            if (values.size() == 0) {
+                return criteriaBuilder.isNull(expression);
+            }
+            return expression.in(values);
+        }
+
+        @Override
+        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
+          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
+            return expression.in(values);
+        }
+
+        @Override
+        public boolean nonNullCheck() {
+            return false;
+        }
+    },
     /** 空 */
     ISNULL() {
         @Override
