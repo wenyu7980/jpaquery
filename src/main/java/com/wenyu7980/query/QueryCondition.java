@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 public class QueryCondition<T extends Comparable<T>> implements QueryPredicateExpress {
 
-    private boolean condition;
+    private boolean condition = true;
     private String name;
     private QueryCompare compare;
     private List<T> values;
@@ -106,7 +106,7 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
     @Override
     public boolean nonNull() {
         if (!this.condition) {
-            return true;
+            return false;
         }
         if (!this.compare.nonNullCheck()) {
             return true;
