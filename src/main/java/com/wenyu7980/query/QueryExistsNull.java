@@ -22,18 +22,24 @@ package com.wenyu7980.query;
  * @date:2019/10/22
  */
 public class QueryExistsNull<T> extends QueryExists<T> {
-    private QueryExistsNull(Class<T> clazz, QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
-        super(clazz, joinPredicate, express);
+    private QueryExistsNull(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        super(condition, clazz, joinPredicate, express);
     }
 
     public static <T> QueryExistsNull exists(Class<T> clazz, QueryExistPredicate joinPredicate,
       QueryPredicateExpress express) {
-        return new QueryExistsNull(clazz, joinPredicate, express);
+        return new QueryExistsNull(true, clazz, joinPredicate, express);
+    }
+
+    public static <T> QueryExistsNull exists(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        return new QueryExistsNull(condition, clazz, joinPredicate, express);
     }
 
     @Override
     public boolean nonNull() {
-        return true;
+        return this.getCondition();
     }
 
 }

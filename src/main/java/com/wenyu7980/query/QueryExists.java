@@ -25,12 +25,15 @@ import java.util.function.Function;
  * @date:2019/10/22
  */
 public class QueryExists<T> implements QueryPredicateExpress {
+    private boolean condition;
     private QueryExistPredicate joinPredicate;
     private Function<From<?, ?>, Expression<?>> subSelect;
     private QueryPredicateExpress express;
     private Class<T> clazz;
 
-    protected QueryExists(Class<T> clazz, QueryExistPredicate joinPredicate, QueryPredicateExpress express) {
+    protected QueryExists(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        this.condition = condition;
         this.joinPredicate = joinPredicate;
         this.express = express;
         this.clazz = clazz;
@@ -38,7 +41,12 @@ public class QueryExists<T> implements QueryPredicateExpress {
 
     public static <T> QueryExists exists(Class<T> clazz, QueryExistPredicate joinPredicate,
       QueryPredicateExpress express) {
-        return new QueryExists(clazz, joinPredicate, express);
+        return new QueryExists(true, clazz, joinPredicate, express);
+    }
+
+    public static <T> QueryExists exists(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        return new QueryExists(condition, clazz, joinPredicate, express);
     }
 
     @Override
@@ -56,9 +64,13 @@ public class QueryExists<T> implements QueryPredicateExpress {
         return criteriaBuilder.exists(subquery);
     }
 
+    protected boolean getCondition() {
+        return this.condition;
+    }
+
     @Override
     public boolean nonNull() {
-        return this.express.nonNull();
+        return this.condition && this.express.nonNull();
     }
 
     @Override

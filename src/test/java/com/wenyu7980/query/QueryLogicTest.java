@@ -57,13 +57,55 @@ public class QueryLogicTest {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
         Root<UserEntity> root = query.from(UserEntity.class);
-        String nullStr = null;
         QueryLogic logic = QueryLogic.and(QueryExistsNull
           .exists(MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
-            QueryCondition.of("mobile", QueryCompare.EQ, nullStr)));
+            QueryLogic.and()));
         query.where(logic.predicate(root, criteriaBuilder));
         List<UserEntity> list = entityManager.createQuery(query).getResultList();
         Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsNullFalse() {
+        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        String nullStr = null;
+        QueryLogic logic = QueryLogic.and(QueryExistsNull
+          .exists(false, MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
+            QueryCondition.of("mobile", QueryCompare.EQ, "nullStr")));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query).getResultList();
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsConditionFalse() {
+        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryLogic logic = QueryLogic.and(QueryExists
+          .exists(false, MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
+            QueryCondition.of("mobile", QueryCompare.EQ, "1")));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query).getResultList();
+        Assert.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testLogicExistsConditionTrue() {
+        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = query.from(UserEntity.class);
+        QueryLogic logic = QueryLogic.and(QueryExists
+          .exists(MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
+            QueryCondition.of("mobile", QueryCompare.EQ, "1")));
+        query.where(logic.predicate(root, criteriaBuilder));
+        List<UserEntity> list = entityManager.createQuery(query).getResultList();
+        Assert.assertEquals(0, list.size());
     }
 
     @Test
