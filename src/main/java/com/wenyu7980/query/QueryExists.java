@@ -2,7 +2,6 @@ package com.wenyu7980.query;
 
 import javax.persistence.criteria.*;
 import java.util.Objects;
-import java.util.function.Function;
 /**
  * Copyright wenyu
  *
@@ -24,10 +23,9 @@ import java.util.function.Function;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryExists<T> implements QueryPredicateExpress {
+public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMergeExpress {
     private boolean condition;
     private QueryExistPredicate joinPredicate;
-    private Function<From<?, ?>, Expression<?>> subSelect;
     private QueryPredicateExpress express;
     private Class<T> clazz;
 
@@ -74,16 +72,24 @@ public class QueryExists<T> implements QueryPredicateExpress {
     }
 
     @Override
-    public boolean merge(QueryPredicateExpress express, QueryPredicateExpress parent) {
+    public boolean merge(QueryPredicateExpress express) {
         if (express instanceof QueryExists) {
             QueryExists exists = (QueryExists) express;
             if (Objects.equals(this.clazz, exists.clazz) && Objects.equals(this.joinPredicate, exists.joinPredicate)) {
-                this.express = parent.logic(this.express, exists.express);
                 return true;
-
             }
         }
         return false;
+    }
+
+    @Override
+    public QueryPredicateExpress getExpress() {
+        return this.express;
+    }
+
+    @Override
+    public void setExpress(QueryPredicateExpress express) {
+        this.express = express;
     }
 
     @Override

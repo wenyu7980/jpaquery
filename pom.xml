@@ -6,8 +6,8 @@
 
     <groupId>com.wenyu7980</groupId>
     <artifactId>jpaQuery</artifactId>
-    <version>3.3.0</version>
-    <name>jpaQuery</name>
+    <version>0.0.1</version>
+    <name>jpa-query</name>
     <url>https://github.com/wenyu7980/jpaquery</url>
     <description>state machine jar</description>
     <licenses>

@@ -25,7 +25,7 @@ import java.util.Objects;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryJoin implements QueryPredicateExpress {
+public class QueryJoin implements QueryPredicateExpress, QueryPredicateMergeExpress {
 
     private String name;
     private QueryPredicateExpress express;
@@ -46,8 +46,7 @@ public class QueryJoin implements QueryPredicateExpress {
     }
 
     @Override
-    public Predicate predicate(From<?, ?> from,
-            CriteriaBuilder criteriaBuilder) {
+    public Predicate predicate(From<?, ?> from, CriteriaBuilder criteriaBuilder) {
         return express.predicate(from.join(name), criteriaBuilder);
     }
 
@@ -57,15 +56,23 @@ public class QueryJoin implements QueryPredicateExpress {
     }
 
     @Override
-    public boolean merge(QueryPredicateExpress express,
-            QueryPredicateExpress parent) {
+    public boolean merge(QueryPredicateExpress express) {
         if (express instanceof QueryJoin) {
             QueryJoin join = (QueryJoin) express;
             if (Objects.equals(join.name, this.name)) {
-                this.express = parent.logic(this.express, join.express);
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public QueryPredicateExpress getExpress() {
+        return this.express;
+    }
+
+    @Override
+    public void setExpress(QueryPredicateExpress express) {
+        this.express = express;
     }
 }
