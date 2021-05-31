@@ -5,7 +5,7 @@
 <!-- https://mvnrepository.com/artifact/com.wenyu7980/statemachine -->
 <dependency>
     <groupId>com.wenyu7980</groupId>
-    <artifactId>jpaQuery</artifactId>
+    <artifactId>jpa-query</artifactId>
     <version>{version}</version>
 </dependency>
 ```
