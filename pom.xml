@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.wenyu7980</groupId>
-    <artifactId>jpaQuery</artifactId>
+    <artifactId>jpa-query</artifactId>
     <version>0.0.1</version>
     <name>jpa-query</name>
     <url>https://github.com/wenyu7980/jpaquery</url>
