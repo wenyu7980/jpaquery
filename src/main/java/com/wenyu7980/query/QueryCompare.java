@@ -25,7 +25,7 @@ import java.util.List;
  * @author:wenyu
  * @date:2019/10/22
  */
-public enum QueryCompare {
+public enum QueryCompare implements QueryComparable {
     /** 等于 */
     EQ() {
         @Override
@@ -59,13 +59,13 @@ public enum QueryCompare {
         @Override
         public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
           List<T> values) {
-            return EQ.predicate(expression, criteriaBuilder, values).not();
+            return criteriaBuilder.notEqual(expression, values.get(0));
         }
 
         @Override
         public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
           CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return EQ.predicateExpression(expression, criteriaBuilder, values).not();
+            return criteriaBuilder.notEqual(expression, values.get(0));
         }
     },
     /** 小于等于 */
@@ -121,7 +121,7 @@ public enum QueryCompare {
         @Override
         public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
           CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return criteriaBuilder.like((Expression<String>) expression, "");
+            throw new RuntimeException("Express Not Support");
         }
     },
     /** 包含 */
@@ -135,28 +135,11 @@ public enum QueryCompare {
         @Override
         public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
           CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return expression.in(values);
-        }
-    },
-    /** 包含NULL */
-    IN_NULL() {
-        @Override
-        public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
-          List<T> values) {
-            if (values.size() == 0) {
-                return criteriaBuilder.isNull(expression);
-            }
-            return expression.in(values);
+            throw new RuntimeException("Express Not Support IN");
         }
 
         @Override
-        public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
-          CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return expression.in(values);
-        }
-
-        @Override
-        public boolean nonNullCheck() {
+        public boolean removeNull() {
             return false;
         }
     },
@@ -165,18 +148,18 @@ public enum QueryCompare {
         @Override
         public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
           List<T> values) {
-            return expression.isNull();
+            return criteriaBuilder.isNull(expression);
         }
 
         @Override
         public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
           CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return expression.isNull();
+            throw new RuntimeException("Express Not Support ISNULL");
         }
 
         @Override
-        public boolean nonNullCheck() {
-            return false;
+        public boolean nullable() {
+            return true;
         }
     },
     /** 非空 */
@@ -184,42 +167,18 @@ public enum QueryCompare {
         @Override
         public <T extends Comparable<T>> Predicate predicate(Expression<T> expression, CriteriaBuilder criteriaBuilder,
           List<T> values) {
-            return expression.isNotNull();
+            return criteriaBuilder.isNotNull(expression);
         }
 
         @Override
         public <T extends Comparable<T>> Predicate predicateExpression(Expression<T> expression,
           CriteriaBuilder criteriaBuilder, List<Expression<T>> values) {
-            return expression.isNotNull();
+            throw new RuntimeException("Express Not Support NOTNULL");
         }
 
         @Override
-        public boolean nonNullCheck() {
-            return false;
+        public boolean nullable() {
+            return true;
         }
     };
-
-    /**
-     * 判定表达式转换为JPA的判定表单式
-     * @param expression
-     * @param criteriaBuilder
-     * @param values
-     * @return
-     */
-    public abstract <T extends Comparable<T>> Predicate predicate(final Expression<T> expression,
-      final CriteriaBuilder criteriaBuilder, List<T> values);
-
-    /**
-     * 判定表达式转换为JPA的判定表单式 空
-     * @param expression
-     * @param criteriaBuilder
-     * @return
-     */
-    public abstract <T extends Comparable<T>> Predicate predicateExpression(final Expression<T> expression,
-      final CriteriaBuilder criteriaBuilder, List<Expression<T>> values);
-
-    public boolean nonNullCheck() {
-        return true;
-    }
-
 }
