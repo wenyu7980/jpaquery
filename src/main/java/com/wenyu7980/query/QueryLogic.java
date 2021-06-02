@@ -192,6 +192,11 @@ public final class QueryLogic implements QueryPredicateExpress {
             public Predicate predicate(final CriteriaBuilder criteriaBuilder, Predicate... predicates) {
                 return predicates[0].not();
             }
+
+            @Override
+            public boolean expand() {
+                return false;
+            }
         },
         // 异或
         XOR() {
@@ -199,6 +204,11 @@ public final class QueryLogic implements QueryPredicateExpress {
             public Predicate predicate(final CriteriaBuilder criteriaBuilder, Predicate... predicates) {
                 return criteriaBuilder.or(criteriaBuilder.and(predicates[0], predicates[1].not()),
                   criteriaBuilder.and(predicates[0].not(), predicates[1]));
+            }
+
+            @Override
+            public boolean expand() {
+                return false;
             }
         };
 

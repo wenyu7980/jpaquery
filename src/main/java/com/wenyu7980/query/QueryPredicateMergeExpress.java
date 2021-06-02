@@ -38,7 +38,7 @@ public interface QueryPredicateMergeExpress {
     QueryPredicateExpress getExpress();
 
     /**
-     * 设置Expresses
+     * clone
      * @param express
      */
     QueryPredicateExpress clone(QueryPredicateExpress express);

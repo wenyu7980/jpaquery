@@ -70,11 +70,35 @@ public interface QueryPredicateMergeExpress {
     QueryPredicateExpress getExpress();
 
     /**
-     * 设置Expresses
+     * clone
      * @param express
      */
-    void setExpress(QueryPredicateExpress express);
+    QueryPredicateExpress clone(QueryPredicateExpress express);
 }
+```
+```java
+
+/**
+ * 逻辑表达式
+ * @author wenyu
+ */
+public interface QueryLogicOperator {
+
+    /**
+     * 判定表达式转换为JPA的判定表单式
+     * @param criteriaBuilder
+     * @param predicates
+     * @return
+     */
+    Predicate predicate(final CriteriaBuilder criteriaBuilder, Predicate... predicates);
+
+    /**
+     * 是否可以展开
+     * @return
+     */
+    boolean expand();
+}
+
 ```
 ## 具体实现类
 + QueryCondition
@@ -85,17 +109,9 @@ public interface QueryPredicateMergeExpress {
 >条件判断
 使用QueryCompare枚举，主要是等于，不等于，大于，Like，in,null 等
 判断值使用的是表中字段，例如 select * from A a where a.b = a.c
-+ QueryConditionNull
->条件判断
-使用QueryCompare枚举，主要是等于，不等于，大于，Like，in,null 等
-如果判断值为null时，依旧会参与到判断中
 + QueryExists
 >存在判断
 如果logic的nonNull为false时，则**不会**参与到判断中
-+ QueryExistsNull
->存在判断
-存在判断
-如果logic的nonNull为false时，依旧会参与到判断中
 + QueryJoin
 >表拦截
 如果logic的nonNull为false时，则**不会**参与到判断中
