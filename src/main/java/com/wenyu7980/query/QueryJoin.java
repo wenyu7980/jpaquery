@@ -25,10 +25,10 @@ import java.util.Objects;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryJoin implements QueryPredicateExpress, QueryPredicateMergeExpress {
+public final class QueryJoin implements QueryPredicateExpress, QueryPredicateMergeExpress {
 
-    private String name;
-    private QueryPredicateExpress express;
+    private final String name;
+    private final QueryPredicateExpress express;
 
     private QueryJoin(String name, QueryPredicateExpress express) {
         this.name = name;
@@ -72,7 +72,24 @@ public class QueryJoin implements QueryPredicateExpress, QueryPredicateMergeExpr
     }
 
     @Override
-    public void setExpress(QueryPredicateExpress express) {
-        this.express = express;
+    public QueryPredicateExpress clone(QueryPredicateExpress express) {
+        return join(this.name, express);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        QueryJoin join = (QueryJoin) o;
+        return Objects.equals(name, join.name) && Objects.equals(express, join.express);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, express);
     }
 }

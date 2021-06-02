@@ -37,7 +37,5 @@ public interface QueryPredicateExpress {
      * 判定表达式的比较值是否为非空
      * @return
      */
-    default boolean nonNull() {
-        return true;
-    }
+    boolean nonNull();
 }

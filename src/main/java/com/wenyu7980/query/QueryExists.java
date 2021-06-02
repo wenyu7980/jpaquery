@@ -23,11 +23,11 @@ import java.util.Objects;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMergeExpress {
-    private boolean condition;
-    private QueryExistPredicate joinPredicate;
-    private QueryPredicateExpress express;
-    private Class<T> clazz;
+public final class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMergeExpress {
+    private final boolean condition;
+    private final QueryExistPredicate joinPredicate;
+    private final QueryPredicateExpress express;
+    private final Class<T> clazz;
 
     protected QueryExists(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
       QueryPredicateExpress express) {
@@ -39,12 +39,22 @@ public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMerg
 
     public static <T> QueryExists exists(Class<T> clazz, QueryExistPredicate joinPredicate,
       QueryPredicateExpress express) {
-        return new QueryExists(true, clazz, joinPredicate, express);
+        return exists(express.nonNull(), clazz, joinPredicate, express);
     }
 
     public static <T> QueryExists exists(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
       QueryPredicateExpress express) {
         return new QueryExists(condition, clazz, joinPredicate, express);
+    }
+
+    public static <T> QueryExists existsNull(boolean condition, Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        return new QueryExists(condition, clazz, joinPredicate, express);
+    }
+
+    public static <T> QueryExists existsNull(Class<T> clazz, QueryExistPredicate joinPredicate,
+      QueryPredicateExpress express) {
+        return existsNull(true, clazz, joinPredicate, express);
     }
 
     @Override
@@ -53,7 +63,7 @@ public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMerg
         Subquery<T> subquery = criteria.subquery(clazz);
         Root<T> subRoot = subquery.from(clazz);
         subquery.select(subRoot);
-        if (express.nonNull()) {
+        if (condition && express.nonNull()) {
             subquery.where(criteriaBuilder.and(express.predicate(subRoot, criteriaBuilder),
               this.joinPredicate.apply(from, subRoot, criteriaBuilder)));
         } else {
@@ -62,13 +72,9 @@ public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMerg
         return criteriaBuilder.exists(subquery);
     }
 
-    protected boolean getCondition() {
-        return this.condition;
-    }
-
     @Override
     public boolean nonNull() {
-        return this.condition && this.express.nonNull();
+        return this.condition;
     }
 
     @Override
@@ -88,8 +94,8 @@ public class QueryExists<T> implements QueryPredicateExpress, QueryPredicateMerg
     }
 
     @Override
-    public void setExpress(QueryPredicateExpress express) {
-        this.express = express;
+    public QueryPredicateExpress clone(QueryPredicateExpress express) {
+        return exists(this.clazz, this.joinPredicate, express);
     }
 
     @Override

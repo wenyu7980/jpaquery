@@ -1,14 +1,10 @@
 package com.wenyu7980.query;
 
-import com.sun.istack.internal.NotNull;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
+import java.util.*;
 import java.util.stream.Collectors;
 /**
  * Copyright wenyu
@@ -38,12 +34,27 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
     private final QueryComparable compare;
     private final List<T> values;
 
-    private QueryCondition(boolean condition, String name, QueryComparable compare, @NotNull List<T> values) {
-        assert values != null;
+    private QueryCondition(boolean condition, String name, QueryComparable compare, List<T> values) {
         this.name = name;
         this.condition = condition;
         this.compare = compare;
         this.values = values;
+    }
+
+    /**
+     * 查询条件
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> of(boolean condition, String name,
+      QueryComparable compare, @NotNull Collection<T> values) {
+        assert values != null;
+        List<T> collect = values.stream().filter(v -> v != null || !compare.removeNull()).collect(Collectors.toList());
+        return new QueryCondition<>(condition && (compare.nullable() || collect.size() > 0), name, compare, collect);
     }
 
     /**
@@ -55,9 +66,23 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      * @return
      */
     public static <T extends Comparable<T>> QueryCondition<T> of(String name, QueryComparable compare,
-      Collection<T> values) {
-        List<T> collect = values.stream().filter(v -> v != null || !compare.removeNull()).collect(Collectors.toList());
-        return new QueryCondition<>(compare.nullable() || collect.size() > 0, name, compare, collect);
+      @NotNull Collection<T> values) {
+        return of(true, name, compare, values);
+    }
+
+    /**
+     *
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> of(boolean condition, String name,
+      QueryComparable compare, T... values) {
+        assert values.length > 0;
+        return QueryCondition.of(condition, name, compare, Arrays.asList(values));
     }
 
     /**
@@ -69,7 +94,28 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      * @return
      */
     public static <T extends Comparable<T>> QueryCondition<T> of(String name, QueryComparable compare, T... values) {
-        return QueryCondition.of(name, compare, Arrays.asList(values));
+        return of(true, name, compare, values);
+    }
+
+    /**
+     *
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> ofNullable(boolean condition, String name,
+      QueryComparable compare, Collection<T> values) {
+        List<T> collect = new ArrayList<>();
+        if (values != null) {
+            collect = values.stream().filter(v -> v != null || !compare.removeNull()).collect(Collectors.toList());
+        }
+        if (collect.size() == 0) {
+            collect.add(null);
+        }
+        return new QueryCondition<>(condition, name, compare, collect);
     }
 
     /**
@@ -79,15 +125,24 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      * @param values
      * @param <T>
      * @return
-     * @since 3.0.0
      */
     public static <T extends Comparable<T>> QueryCondition<T> ofNullable(String name, QueryComparable compare,
       Collection<T> values) {
-        List<T> collect = values.stream().filter(v -> v != null || !compare.removeNull()).collect(Collectors.toList());
-        if (collect.size() == 0) {
-            collect = Arrays.asList(null);
-        }
-        return new QueryCondition<>(true, name, compare, collect);
+        return ofNullable(true, name, compare, values);
+    }
+
+    /**
+     *
+     * @param condition
+     * @param name
+     * @param compare
+     * @param values
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<T>> QueryCondition<T> ofNullable(boolean condition, String name,
+      QueryComparable compare, T... values) {
+        return ofNullable(condition, name, compare, Arrays.asList(values));
     }
 
     /**
@@ -97,11 +152,10 @@ public class QueryCondition<T extends Comparable<T>> implements QueryPredicateEx
      * @param values
      * @param <T>
      * @return
-     * @since 3.0.0
      */
-    public static <T extends Comparable<T>> QueryCondition<T> ofNullable(String name, QueryCompare compare,
+    public static <T extends Comparable<T>> QueryCondition<T> ofNullable(String name, QueryComparable compare,
       T... values) {
-        return QueryCondition.ofNullable(name, compare, Arrays.asList(values));
+        return ofNullable(true, name, compare, values);
     }
 
     @Override

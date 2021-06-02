@@ -5,6 +5,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 /**
@@ -28,40 +29,50 @@ import java.util.Objects;
  * @author:wenyu
  * @date:2019/10/22
  */
-public class QueryConditionExpression<T extends Comparable<T>>
-        implements QueryPredicateExpress {
+public class QueryConditionExpression<T extends Comparable<T>> implements QueryPredicateExpress {
 
-    private String name;
-    private QueryCompare compare;
-    private String other;
+    private final boolean condition;
+    private final String name;
+    private final QueryComparable compare;
+    private final List<String> others;
 
-    private QueryConditionExpression(String name, QueryCompare compare,
-            String other) {
+    private QueryConditionExpression(boolean condition, String name, QueryComparable compare, List<String> others) {
+        this.condition = condition;
         this.name = name;
         this.compare = compare;
-        this.other = other;
+        this.others = others;
     }
 
     /**
      * 查询条件
      * @param name
      * @param compare
-     * @param other
+     * @param others
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<T>> QueryConditionExpression<T> of(
-            String name, QueryCompare compare, String other) {
-        return new QueryConditionExpression<>(name, compare, other);
+    public static <T extends Comparable<T>> QueryConditionExpression<T> of(String name, QueryComparable compare,
+      String... others) {
+        return of(true, name, compare, others);
+    }
+
+    public static <T extends Comparable<T>> QueryConditionExpression<T> of(boolean condition, String name,
+      QueryComparable compare, String... other) {
+        return new QueryConditionExpression<>(condition, name, compare, Arrays.asList(other));
     }
 
     @Override
-    public Predicate predicate(final From<?, ?> from,
-            final CriteriaBuilder criteriaBuilder) {
+    public Predicate predicate(final From<?, ?> from, final CriteriaBuilder criteriaBuilder) {
         List<Expression<T>> list = new ArrayList<>();
-        list.add(from.get(other));
-        return compare.predicateExpression(from.get(this.name), criteriaBuilder,
-                list);
+        for (String n : this.others) {
+            list.add(from.get(n));
+        }
+        return compare.predicateExpression(from.get(this.name), criteriaBuilder, list);
+    }
+
+    @Override
+    public boolean nonNull() {
+        return this.condition;
     }
 
     @Override
@@ -73,12 +84,11 @@ public class QueryConditionExpression<T extends Comparable<T>>
             return false;
         }
         QueryConditionExpression<?> that = (QueryConditionExpression<?>) object;
-        return Objects.equals(name, that.name) && compare == that.compare
-                && Objects.equals(other, that.other);
+        return Objects.equals(name, that.name) && compare == that.compare && Objects.equals(others, that.others);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, compare, other);
+        return Objects.hash(name, compare, others);
     }
 }

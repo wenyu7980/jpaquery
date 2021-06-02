@@ -41,5 +41,5 @@ public interface QueryPredicateMergeExpress {
      * 设置Expresses
      * @param express
      */
-    void setExpress(QueryPredicateExpress express);
+    QueryPredicateExpress clone(QueryPredicateExpress express);
 }

@@ -14,92 +14,90 @@ import java.util.List;
 
 public class QueryConditionTest {
     @Test
-    public void testOfCollection() {
-        List<Integer> list = Arrays.asList(0, 1);
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
-        Mockito.when(compare.nullable()).thenReturn(false);
+    public void testOf() {
         From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Path path = Mockito.mock(Path.class);
-        Mockito.when(from.get("name")).thenReturn(path);
+        QueryComparable compare = Mockito.mock(QueryComparable.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Predicate predicate = Mockito.mock(Predicate.class);
-        Mockito.when(compare.predicate(path, criteriaBuilder, list)).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.of("name", compare, list);
+        Mockito.when(compare.nullable()).thenReturn(false);
+        Mockito.when(from.get("name")).thenReturn(path);
+        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0, 1))).thenReturn(predicate);
+        QueryCondition<Integer> condition = QueryCondition.of("name", compare, 0, 1);
         Predicate result = condition.predicate(from, criteriaBuilder);
         Assert.assertTrue(condition.nonNull());
         Assert.assertEquals(predicate, result);
         Mockito.verify(from, Mockito.times(1)).get("name");
-        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, list);
+        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0, 1));
+    }
+
+    @Test
+    public void testOfCollection() {
+        From from = Mockito.mock(From.class);
+        Path path = Mockito.mock(Path.class);
+        QueryComparable compare = Mockito.mock(QueryComparable.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(compare.nullable()).thenReturn(false);
+        Mockito.when(from.get("name")).thenReturn(path);
+        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0, 1))).thenReturn(predicate);
+        QueryCondition<Integer> condition = QueryCondition.of("name", compare, Arrays.asList(0, 1));
+        Predicate result = condition.predicate(from, criteriaBuilder);
+        Assert.assertTrue(condition.nonNull());
+        Assert.assertEquals(predicate, result);
+        Mockito.verify(from, Mockito.times(1)).get("name");
+        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0, 1));
+    }
+
+    @Test
+    public void testOfNullable() {
+        From from = Mockito.mock(From.class);
+        Path path = Mockito.mock(Path.class);
+        QueryComparable compare = Mockito.mock(QueryComparable.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(compare.nullable()).thenReturn(false);
+        Mockito.when(from.get("name")).thenReturn(path);
+        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0, 1))).thenReturn(predicate);
+        QueryCondition<Integer> condition = QueryCondition.ofNullable("name", compare, 0, 1);
+        Predicate result = condition.predicate(from, criteriaBuilder);
+        Assert.assertTrue(condition.nonNull());
+        Assert.assertEquals(predicate, result);
+        Mockito.verify(from, Mockito.times(1)).get("name");
+        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0, 1));
     }
 
     @Test
     public void testOfNullableCollection() {
-        List<Integer> list = Arrays.asList(0, 1);
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
-        Mockito.when(compare.nullable()).thenReturn(false);
         From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Path path = Mockito.mock(Path.class);
-        Mockito.when(from.get("name")).thenReturn(path);
+        QueryComparable compare = Mockito.mock(QueryComparable.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Predicate predicate = Mockito.mock(Predicate.class);
-        Mockito.when(compare.predicate(path, criteriaBuilder, list)).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.ofNullable("name", compare, list);
-        Predicate result = condition.predicate(from, criteriaBuilder);
-        Assert.assertFalse(condition.nonNull());
-        Assert.assertEquals(predicate, result);
-        Mockito.verify(from, Mockito.times(1)).get("name");
-        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, list);
-    }
-
-    @Test
-    public void testOf() {
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
         Mockito.when(compare.nullable()).thenReturn(false);
-        From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
-        Path path = Mockito.mock(Path.class);
         Mockito.when(from.get("name")).thenReturn(path);
-        Predicate predicate = Mockito.mock(Predicate.class);
-        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0))).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.of("name", compare, 0);
+        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0, 1))).thenReturn(predicate);
+        QueryCondition<Integer> condition = QueryCondition.ofNullable("name", compare, Arrays.asList(0, 1));
         Predicate result = condition.predicate(from, criteriaBuilder);
         Assert.assertTrue(condition.nonNull());
         Assert.assertEquals(predicate, result);
         Mockito.verify(from, Mockito.times(1)).get("name");
-        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0));
+        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0, 1));
     }
 
     @Test
-    public void testOfCondition() {
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
-        Mockito.when(compare.nullable()).thenReturn(false);
+    public void testOfNullableNull() {
         From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Path path = Mockito.mock(Path.class);
-        Mockito.when(from.get("name")).thenReturn(path);
+        QueryComparable compare = Mockito.mock(QueryComparable.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
         Predicate predicate = Mockito.mock(Predicate.class);
-        Mockito.when(compare.predicate(path, criteriaBuilder, Arrays.asList(0))).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.ofNullable("name", compare, 0);
-        Predicate result = condition.predicate(from, criteriaBuilder);
-        Assert.assertTrue(condition.nonNull());
-        Assert.assertEquals(predicate, result);
-        Mockito.verify(from, Mockito.times(1)).get("name");
-        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, Arrays.asList(0));
-    }
-
-    @Test
-    public void testOfConditionNull() {
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
-        Mockito.when(compare.nullable()).thenReturn(false);
+        Mockito.when(compare.nullable()).thenReturn(true);
+        Mockito.when(from.get("name")).thenReturn(path);
         List<Integer> list = new ArrayList<>();
         list.add(null);
-        From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
-        Path path = Mockito.mock(Path.class);
-        Mockito.when(from.get("name")).thenReturn(path);
-        Predicate predicate = Mockito.mock(Predicate.class);
         Mockito.when(compare.predicate(path, criteriaBuilder, list)).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.of("name", compare, list);
+        QueryCondition<Integer> condition = QueryCondition.ofNullable("name", compare);
         Predicate result = condition.predicate(from, criteriaBuilder);
         Assert.assertTrue(condition.nonNull());
         Assert.assertEquals(predicate, result);
@@ -108,28 +106,20 @@ public class QueryConditionTest {
     }
 
     @Test
-    public void testOfConditionNull2() {
-        QueryCompare compare = Mockito.mock(QueryCompare.class);
-        Mockito.when(compare.nullable()).thenReturn(false);
-        Mockito.when(compare.removeNull()).thenReturn(true);
-        List<Integer> list = new ArrayList<>();
-        list.add(null);
-        From from = Mockito.mock(From.class);
-        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
-        Path path = Mockito.mock(Path.class);
-        Mockito.when(from.get("name")).thenReturn(path);
-        Predicate predicate = Mockito.mock(Predicate.class);
-        Mockito.when(compare.predicate(path, criteriaBuilder, new ArrayList<Integer>())).thenReturn(predicate);
-        QueryCondition<Integer> condition = QueryCondition.of("name", compare, list);
-        Predicate result = condition.predicate(from, criteriaBuilder);
-        Assert.assertFalse(condition.nonNull());
-        Assert.assertEquals(predicate, result);
-        Mockito.verify(from, Mockito.times(1)).get("name");
-        Mockito.verify(compare, Mockito.times(1)).predicate(path, criteriaBuilder, new ArrayList<Integer>());
-    }
-
-    @Test
-    public void testNonNull() {
+    public void testHashEqual() {
+        QueryCondition<Integer> q1 = QueryCondition.of("name", QueryCompare.EQ, 0, 1);
+        Assert.assertEquals(q1, q1);
+        Assert.assertNotEquals(q1, null);
+        QueryCondition<Integer> q2 = QueryCondition.of("name", QueryCompare.EQ, 0, 1);
+        Assert.assertEquals(q1, q2);
+        Assert.assertEquals(q1.hashCode(), q2.hashCode());
+        QueryCondition<Integer> q3 = QueryCondition.of("name", QueryCompare.EQ, 1);
+        Assert.assertNotEquals(q1, q3);
+        Assert.assertNotEquals(q1.hashCode(), q3.hashCode());
+        QueryCondition<Integer> q4 = QueryCondition.of("name", QueryCompare.EQ, 1, 0);
+        Assert.assertNotEquals(q1, q4);
+        Assert.assertNotEquals(q1.hashCode(), q4.hashCode());
 
     }
+
 }

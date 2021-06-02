@@ -20,6 +20,12 @@ public class QueryCompareTest {
     }
 
     @Test
+    public void testRemoveNull() {
+        Assert.assertTrue(QueryCompare.EQ.removeNull());
+        Assert.assertFalse(QueryCompare.IN.removeNull());
+    }
+
+    @Test
     public void testQE() {
         Expression expression = Mockito.mock(Expression.class);
         CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);

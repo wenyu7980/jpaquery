@@ -1,305 +1,191 @@
 package com.wenyu7980.query;
 
-import com.wenyu7980.query.entity.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.io.File;
-import java.util.ArrayList;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 import java.util.Arrays;
-import java.util.List;
 
-/**
- *
- * @author:wenyu
- * @date:2019/10/23
- */
 public class QueryLogicTest {
-
-    private static final String FILEPATH = "src/test/resources/hibernate.properties";
-    private SessionFactory sessionFactory;
-    private Session session;
-
-    @Before
-    public void init() {
-        File file = new File(FILEPATH);
-        //创建服务注册对象
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-          //加载Hibernate配置文件
-          .loadProperties(file).build();
-
-        //创建会话工厂对象
-        sessionFactory = new MetadataSources(registry)
-          //将持久化类添加到元数据源
-          .addAnnotatedClass(MobileEntity.class).addAnnotatedClass(AddressEntity.class)
-          .addAnnotatedClass(InfoEntity.class).addAnnotatedClass(UserEntity.class).addAnnotatedClass(LabelEntity.class)
-          .buildMetadata().buildSessionFactory();
-        //打开会话
-        session = sessionFactory.openSession();
-        insertData(1);
-        insertData(2);
+    @Test
+    public void testOf() {
+        QueryLogicOperator logic = Mockito.mock(QueryLogicOperator.class);
+        From from = Mockito.mock(From.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e3 = Mockito.mock(QueryPredicateExpress.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate p3 = Mockito.mock(Predicate.class);
+        Mockito.when(e1.nonNull()).thenReturn(true);
+        Mockito.when(e2.nonNull()).thenReturn(true);
+        Mockito.when(e3.nonNull()).thenReturn(true);
+        Mockito.when(e1.predicate(from, criteriaBuilder)).thenReturn(p1);
+        Mockito.when(e2.predicate(from, criteriaBuilder)).thenReturn(p2);
+        Mockito.when(e3.predicate(from, criteriaBuilder)).thenReturn(p3);
+        Mockito.when(logic.predicate(criteriaBuilder, p1, p2, p3)).thenReturn(predicate);
+        QueryLogic queryLogic = QueryLogic.of(logic, e1, e2, e3);
+        Predicate result = queryLogic.predicate(from, criteriaBuilder);
+        Assert.assertEquals(predicate, result);
+        Assert.assertTrue(queryLogic.nonNull());
     }
 
     @Test
-    public void testLogicExistsNull() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryExistsNull
-          .exists(MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
-            QueryLogic.and()));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, list.size());
+    public void testExpand() {
+        QueryLogicOperator logic = Mockito.mock(QueryLogicOperator.class);
+        From from = Mockito.mock(From.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e3 = Mockito.mock(QueryPredicateExpress.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate p3 = Mockito.mock(Predicate.class);
+        Mockito.when(e1.nonNull()).thenReturn(true);
+        Mockito.when(e2.nonNull()).thenReturn(true);
+        Mockito.when(e3.nonNull()).thenReturn(true);
+        Mockito.when(e1.predicate(from, criteriaBuilder)).thenReturn(p1);
+        Mockito.when(e2.predicate(from, criteriaBuilder)).thenReturn(p2);
+        Mockito.when(e3.predicate(from, criteriaBuilder)).thenReturn(p3);
+        Mockito.when(logic.predicate(criteriaBuilder, p1, p2, p3)).thenReturn(predicate);
+        Mockito.when(logic.expand()).thenReturn(true);
+        QueryLogic queryLogic = QueryLogic.of(logic, QueryLogic.of(logic, e1), QueryLogic.of(logic, e2, e3));
+        Predicate result = queryLogic.predicate(from, criteriaBuilder);
+        Assert.assertEquals(predicate, result);
+        Assert.assertTrue(queryLogic.nonNull());
     }
 
     @Test
-    public void testLogicExistsNullFalse() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        String nullStr = null;
-        QueryLogic logic = QueryLogic.and(QueryExistsNull
-          .exists(false, MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
-            QueryCondition.of("mobile", QueryCompare.EQ, "nullStr")));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, list.size());
+    public void testMerge() {
+        QueryLogicOperator logic = Mockito.mock(QueryLogicOperator.class);
+        From from = Mockito.mock(From.class);
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        QueryPredicateMerge m1 = Mockito.mock(QueryPredicateMerge.class);
+        QueryPredicateMerge m2 = Mockito.mock(QueryPredicateMerge.class);
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(m1.merge(m2)).thenReturn(true);
+        Mockito.when(m1.getExpress()).thenReturn(e1);
+        Mockito.when(m2.getExpress()).thenReturn(e2);
+        Mockito.when(m1.nonNull()).thenReturn(true);
+        Mockito.when(m2.nonNull()).thenReturn(true);
+        Mockito.when(m1.predicate(from, criteriaBuilder)).thenReturn(p1);
+        Mockito.when(m2.predicate(from, criteriaBuilder)).thenReturn(p2);
+        Mockito.when(logic.predicate(criteriaBuilder, p1, p2)).thenReturn(predicate);
+        QueryLogic of = QueryLogic.of(logic, m1, m2);
+        Mockito.verify(m1, Mockito.times(1)).clone(QueryLogic.of(logic, e1, e2));
     }
 
     @Test
-    public void testLogicExistsConditionFalse() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryExists
-          .exists(false, MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
-            QueryCondition.of("mobile", QueryCompare.EQ, "1")));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, list.size());
+    public void testHashEqual() {
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        Mockito.when(e1.nonNull()).thenReturn(true);
+        QueryLogic l1 = QueryLogic.and(e1);
+        QueryLogic l2 = QueryLogic.and(e1);
+        Assert.assertEquals(l1, l2);
+        Assert.assertEquals(l1, l1);
+        Assert.assertEquals(l1.hashCode(), l2.hashCode());
+        Assert.assertNotEquals(l1, null);
     }
 
     @Test
-    public void testLogicExistsConditionTrue() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryExists
-          .exists(MobileEntity.class, (from, r, c) -> c.equal(from.get("mobile").get("id"), r.get("id")),
-            QueryCondition.of("mobile", QueryCompare.EQ, "1")));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(0, list.size());
+    public void testAnd() {
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate p3 = Mockito.mock(Predicate.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(criteriaBuilder.and(p1, p2, p3)).thenReturn(predicate);
+        Predicate result = QueryLogic.Logic.AND.predicate(criteriaBuilder, p1, p2, p3);
+        Assert.assertEquals(predicate, result);
     }
 
     @Test
-    public void testLogicNull() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and();
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, list.size());
+    public void testAnd2() {
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        QueryLogic of = QueryLogic.of(QueryLogic.Logic.AND, e1, e2);
+        QueryLogic and = QueryLogic.and(e1, e2);
+        Assert.assertEquals(of, and);
+        QueryLogic and2 = QueryLogic.and(Arrays.asList(e1, e2));
+        Assert.assertEquals(of, and2);
     }
 
     @Test
-    public void testConditionExpression() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryPredicateExpress express = QueryConditionExpression.of("username", QueryCompare.EQ, "username");
-        query.where(express.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, list.size());
-    }
-
-    /**
-     * user table
-     * user1,username1
-     *
-     * address
-     * address1,addressx1
-     *
-     * mobile
-     * mobile1,mobilex1
-     * @param i
-     */
-    public void insertData(int i) {
-        //打开事务
-        Transaction transaction = session.beginTransaction();
-        LabelEntity labelEntity1 = new LabelEntity("L" + i, "LABEL1");
-        session.save(labelEntity1);
-        LabelEntity labelEntity2 = new LabelEntity("L" + i + "x", "LABEL1");
-        session.save(labelEntity2);
-        AddressEntity addressEntity = new AddressEntity("address" + i, "addressx" + 1);
-        InfoEntity infoEntity = new InfoEntity("info" + i, "infox" + i, addressEntity);
-        MobileEntity mobileEntity = new MobileEntity("mobile" + i, "mobilex" + i);
-        UserEntity userEntity = new UserEntity("user" + i, "username" + i, infoEntity, mobileEntity,
-          Arrays.asList(labelEntity1, labelEntity2));
-        session.save(addressEntity);
-        session.save(infoEntity);
-        session.save(mobileEntity);
-        session.save(userEntity);
-        transaction.commit();
+    public void testOr() {
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate p3 = Mockito.mock(Predicate.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(criteriaBuilder.or(p1, p2, p3)).thenReturn(predicate);
+        Predicate result = QueryLogic.Logic.OR.predicate(criteriaBuilder, p1, p2, p3);
+        Assert.assertEquals(predicate, result);
     }
 
     @Test
-    public void testConditionEquals() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1"),
-          QueryCondition.of("username", QueryCompare.EQ, "username1"));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
+    public void testOr2() {
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        QueryLogic of = QueryLogic.of(QueryLogic.Logic.OR, e1, e2);
+        QueryLogic or = QueryLogic.or(e1, e2);
+        Assert.assertEquals(of, or);
+        QueryLogic or2 = QueryLogic.or(Arrays.asList(e1, e2));
+        Assert.assertEquals(of, or2);
     }
 
     @Test
-    public void testConditionEquals2() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.and(QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1")),
-          QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1")));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
+    public void testNot() {
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(p1.not()).thenReturn(predicate);
+        Predicate result = QueryLogic.Logic.NOT.predicate(criteriaBuilder, p1);
+        Assert.assertEquals(predicate, result);
     }
 
     @Test
-    public void testMerge1() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.or(QueryLogic.or(QueryCondition.of("username", QueryCompare.EQ, "username1"),
-          QueryCondition.of("username", QueryCompare.EQ, "username1")),
-          QueryLogic.or(QueryCondition.of("username", QueryCompare.EQ, "username1")),
-          QueryCondition.of("username", QueryCompare.EQ, "username1"));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
+    public void testNot2() {
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryLogic of = QueryLogic.of(QueryLogic.Logic.NOT, e1);
+        QueryLogic or = QueryLogic.not(e1);
+        Assert.assertEquals(of, or);
     }
 
     @Test
-    public void testMerge2() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.or(QueryLogic.or(QueryCondition.of("id", QueryCompare.EQ, "user1"),
-          QueryCondition.of("username", QueryCompare.EQ, "username1")),
-          QueryLogic.or(QueryCondition.of("username", QueryCompare.EQ, "username1")),
-          QueryCondition.of("id", QueryCompare.EQ, "user1"));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
+    public void testXor() {
+        CriteriaBuilder criteriaBuilder = Mockito.mock(CriteriaBuilder.class);
+        Predicate p1 = Mockito.mock(Predicate.class);
+        Predicate p2 = Mockito.mock(Predicate.class);
+        Predicate np1 = Mockito.mock(Predicate.class);
+        Predicate np2 = Mockito.mock(Predicate.class);
+        Predicate x1 = Mockito.mock(Predicate.class);
+        Predicate x2 = Mockito.mock(Predicate.class);
+        Mockito.when(p1.not()).thenReturn(np1);
+        Mockito.when(p2.not()).thenReturn(np2);
+        Mockito.when(criteriaBuilder.and(p1, np2)).thenReturn(x1);
+        Mockito.when(criteriaBuilder.and(np1, p2)).thenReturn(x2);
+        Predicate predicate = Mockito.mock(Predicate.class);
+        Mockito.when(criteriaBuilder.or(x1, x2)).thenReturn(predicate);
+        Predicate result = QueryLogic.Logic.XOR.predicate(criteriaBuilder, p1, p2);
+        Assert.assertEquals(predicate, result);
     }
 
     @Test
-    public void testMergeJoin1() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryLogic logic = QueryLogic.or(QueryCondition.of("username", QueryCompare.EQ, "username1"), QueryJoin
-            .join("info", QueryLogic.and(QueryCondition.of("info", QueryCompare.EQ, "infox1"),
-              QueryJoin.join("address", QueryLogic.and(QueryCondition.of("address", QueryCompare.EQ, "addressx1"))))),
-          QueryJoin.join("info", QueryLogic.and(QueryCondition.of("id", QueryCompare.EQ, "info1"))));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals(list.get(0).getId(), "user1");
-    }
-
-    @Test
-    public void testMergeJoin2() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1"),
-          QueryJoin.join("info", QueryLogic.and(QueryCondition.of("info", QueryCompare.EQ, "infox1"),
-            QueryJoin.join("address", QueryLogic.and(QueryCondition.of("address", QueryCompare.EQ, "addressx1"))))),
-          QueryJoin.join("info", QueryLogic.not(QueryCondition.of("id", QueryCompare.IN, "info2"))));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> list = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals(list.get(0).getId(), "user1");
-    }
-
-    //    @Test
-    //    public void testInNull() {
-    //        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-    //        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    //        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-    //        Root<UserEntity> root = query.from(UserEntity.class);
-    //        List<String> list = new ArrayList<>();
-    //        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.IN_NULL, list));
-    //        query.where(logic.predicate(root, criteriaBuilder));
-    //        List<UserEntity> results = entityManager.createQuery(query).getResultList();
-    //        Assert.assertEquals(0, results.size());
-    //    }
-
-    @Test
-    public void testInNotNull() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        List<String> list = new ArrayList<>();
-        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.IN, list));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> results = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, results.size());
-    }
-
-    @Test
-    public void testConditionTrue() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        List<String> list = new ArrayList<>();
-        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1"));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> results = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(results.get(0).getId(), "user1");
-    }
-
-    @Test
-    public void testConditionFalse() {
-        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<UserEntity> query = criteriaBuilder.createQuery(UserEntity.class);
-        Root<UserEntity> root = query.from(UserEntity.class);
-        List<String> list = new ArrayList<>();
-        QueryPredicateExpress logic = QueryLogic.and(QueryCondition.of("username", QueryCompare.EQ, "username1"));
-        query.where(logic.predicate(root, criteriaBuilder));
-        List<UserEntity> results = entityManager.createQuery(query).getResultList();
-        Assert.assertEquals(2, results.size());
+    public void testXor2() {
+        QueryPredicateExpress e1 = Mockito.mock(QueryPredicateExpress.class);
+        QueryPredicateExpress e2 = Mockito.mock(QueryPredicateExpress.class);
+        QueryLogic of = QueryLogic.of(QueryLogic.Logic.XOR, e1, e2);
+        QueryLogic or = QueryLogic.xor(e1, e2);
+        Assert.assertEquals(of, or);
     }
 }
